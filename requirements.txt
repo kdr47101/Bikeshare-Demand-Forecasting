@@ -1,0 +1,8 @@
+﻿python-dotenv
+pandas
+numpy
+pyarrow
+requests
+scikit-learn
+statsmodels
+holidays
