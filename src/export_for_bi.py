@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿import pandas as pd
 import os
 from pathlib import Path
@@ -78,4 +79,3 @@ def process_ridership_data():
 
 if __name__ == "__main__":
     process_ridership_data()
-

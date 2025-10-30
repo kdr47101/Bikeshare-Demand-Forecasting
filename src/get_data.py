@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from urllib.parse import urlparse
 import requests
+<<<<<<< HEAD
 import csv
 import time
 
@@ -18,6 +19,12 @@ RAW_DIR = Path("data") / "raw"
 DOWNLOAD_FORMAT_WHITELIST = {"CSV", "JSON", "ZIP", "XLS", "XLSX", "GEOJSON", "PARQUET"}
 DOWNLOAD_SUFFIX_WHITELIST = {".csv", ".json", ".zip", ".xls", ".xlsx", ".geojson", ".parquet"}
 
+=======
+from config import BASE_URL, PACKAGE_ID_RIDERSHIP, PACKAGE_ID_STATION, API
+
+RAW_DIR = Path("data") / "raw"
+
+>>>>>>> 2849b4a22882a8be5f61de6c73303a6464272473
 def get_package_json(package_id: str):
     """
     Mirrors the original 'package_show' request:
@@ -36,6 +43,7 @@ def _filename_from_url(url: str, fallback: str) -> str:
     name = os.path.basename(urlparse(url).path)
     return name if name else fallback
 
+<<<<<<< HEAD
 def _collect_fieldnames(rows):
     ordered = []
     for row in rows:
@@ -124,6 +132,8 @@ def _download_with_resume(file_url: str, dest: Path, max_retries: int = 4) -> bo
             time.sleep(1.5 * attempt)
     return dest.exists() and (expected_size is None or dest.stat().st_size >= (expected_size * 0.95))
 
+=======
+>>>>>>> 2849b4a22882a8be5f61de6c73303a6464272473
 def print_and_save_non_datastore_resources(package_json, package_id: str):
     """
     Keeps the original behavior (prints resource metadata), and ALSO:
@@ -131,6 +141,7 @@ def print_and_save_non_datastore_resources(package_json, package_id: str):
       - writes each resource_show JSON to data/raw/resource_{idx}_{id}_metadata.json
       - if resource_show has a 'result.url', downloads that file into data/raw/
     """
+<<<<<<< HEAD
     pkg_dir = RAW_DIR / package_id
     metadata_dir = pkg_dir / "metadata"
     download_dir = pkg_dir / "downloads"
@@ -138,6 +149,10 @@ def print_and_save_non_datastore_resources(package_json, package_id: str):
     download_dir.mkdir(parents=True, exist_ok=True)
 
     _safe_write_json(package_json, pkg_dir / "package.json")
+=======
+    # Save package metadata
+    _safe_write_json(package_json, RAW_DIR / "package.json")
+>>>>>>> 2849b4a22882a8be5f61de6c73303a6464272473
 
     for idx, resource in enumerate(package_json["result"]["resources"]):
         if not resource.get("datastore_active", False):
@@ -149,6 +164,7 @@ def print_and_save_non_datastore_resources(package_json, package_id: str):
             # Original behavior: print it
             print(resource_metadata)
 
+<<<<<<< HEAD
             meta_path = metadata_dir / f"{idx:02d}_{resource['id']}_metadata.json"
             _safe_write_json(resource_metadata, meta_path)
 
@@ -258,9 +274,35 @@ def download_station_data():
 
     _write_csv(combined_csv, combined_rows, combined_fieldnames)
     print(f"Saved combined station details CSV: {combined_csv}")
+=======
+            # Save resource_show metadata
+            meta_path = RAW_DIR / f"resource_{idx}_{resource['id']}_metadata.json"
+            _safe_write_json(resource_metadata, meta_path)
+
+            # If there's a direct file URL, download it
+            result = resource_metadata.get("result", {})
+            file_url = result.get("url")
+            if file_url:
+                filename = _filename_from_url(file_url, f"{resource['id']}.bin")
+                dest = RAW_DIR / filename
+                try:
+                    with requests.get(file_url, stream=True) as r:
+                        r.raise_for_status()
+                        dest.parent.mkdir(parents=True, exist_ok=True)
+                        with dest.open("wb") as f:
+                            for chunk in r.iter_content(chunk_size=8192):
+                                if chunk:
+                                    f.write(chunk)
+                    print(f"Saved file: {dest}")
+                except Exception as e:
+                    print(f"Could not download {file_url}: {e}")
+>>>>>>> 2849b4a22882a8be5f61de6c73303a6464272473
 
 if __name__ == "__main__":
     for PID in (PACKAGE_ID_RIDERSHIP, PACKAGE_ID_STATION):
         pkg = get_package_json(PID)
         print_and_save_non_datastore_resources(pkg, PID)
+<<<<<<< HEAD
     download_station_data()
+=======
+>>>>>>> 2849b4a22882a8be5f61de6c73303a6464272473
